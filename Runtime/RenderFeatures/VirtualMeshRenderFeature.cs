@@ -70,6 +70,8 @@ namespace Unity.VirtualMesh.Runtime
             if (!VirtualMeshManager.Instance.IsEnabled)
                 return;
 
+            VirtualMeshManager.Instance.AdvancePingPongBufferIndex();
+
             // shadows must be drawn after normal shadow rendering
             m_DrawShadowPass.renderPassEvent = RenderPassEvent.AfterRenderingShadows;
             m_DrawShadowPass.settings = settings;

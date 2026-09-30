@@ -425,21 +425,29 @@ namespace Unity.VirtualMesh.Runtime
         /// </summary>
         public GraphicsBuffer FeedbackBuffer => m_FeedbackBuffer;
 
-        /// <summary>
-        /// The buffer containing flags to indicate to the GPU if pages are currently being streamed or if they are ready to be processed.
-        /// </summary>
-        public GraphicsBuffer PageStatusBuffer => m_PageStatusBuffer;
+		/// <summary>
+		/// The buffer containing flags to indicate to the GPU if pages are currently being streamed or if they are ready to be processed.
+		/// </summary>
+		public GraphicsBuffer PageStatusBuffer => m_PageStatusBuffer;
 
-        /// <summary>
-        /// Updates the page status buffer based on a specific page's streaming condition.
-        /// </summary>
-        private void DispatchStatusBufferUpdate(int pageID, int slotID)
-        {
+		/// <summary>
+		/// Advances the triangle visibility ping-pong buffers so the next render frame reads and writes different buffers.
+		/// </summary>
+		public void AdvancePingPongBufferIndex()
+		{
+			m_PingPongBufferIndex = (m_PingPongBufferIndex + 1) % 2;
+		}
+
+		/// <summary>
+		/// Updates the page status buffer based on a specific page's streaming condition.
+		/// </summary>
+		private void DispatchStatusBufferUpdate(int pageID, int slotID)
+		{
 			m_CopyPassesShader.SetInt(VirtualMeshShaderProperties.PageID, pageID);
 			m_CopyPassesShader.SetInt(VirtualMeshShaderProperties.SlotID, slotID);
 			m_CopyPassesShader.SetBuffer(1, VirtualMeshShaderProperties.StatusBufferUAV, m_PageStatusBuffer);
 			m_CopyPassesShader.Dispatch(1, 1, 1, 1);
-        }
+		}
 
         /// <summary>
         /// Starts writing operations on an upload buffer to begin streaming.
@@ -1378,8 +1386,6 @@ namespace Unity.VirtualMesh.Runtime
 
                 DrawPlaceholders();
             }
-
-            m_PingPongBufferIndex = ++m_PingPongBufferIndex % 2;
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

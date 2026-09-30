@@ -48,10 +48,10 @@ namespace Unity.VirtualMesh.Editor
         const int k_MemoryPageMaxInstanceCount = 1600;
         const int k_MemoryPageCount = 256;
 
-        const bool k_SimplifyPlaceholders = true;
-        const bool k_ExportOBJ = false;
-        const bool k_PackIndices = true;
-        const bool k_PackClusterGroupVertices = true;
+        static readonly bool k_SimplifyPlaceholders = true;
+        static readonly bool k_ExportOBJ = false;
+        static readonly bool k_PackIndices = true;
+        static readonly bool k_PackClusterGroupVertices = true;
 
         /// <summary>
         /// Fills a list of MeshFilter objects that should be baked based on a root object specified by the user.
@@ -412,40 +412,47 @@ namespace Unity.VirtualMesh.Editor
 
                     // fill buffers
                     var defaultVertexColor = Color.cyan;
+                    var localToWorld = transform.localToWorldMatrix;
+                    bool hasNormals = n.Length != 0;
+                    bool hasTangents = t.Length != 0;
+                    bool hasColors = col.Length != 0;
+                    bool hasUV0 = uv0.Length != 0;
+                    bool hasUV1 = uv1.Length != 0;
+
                     for (int i = 0; i < tri.Length; i += 3)
                     {
-                        var tangent0 = transform.localToWorldMatrix.MultiplyVector(new Vector3(t[tri[i + 0]].x, t[tri[i + 0]].y, t[tri[i + 0]].z));
-                        var color0 = col.Length != 0 ? col[tri[i + 0]] : defaultVertexColor;
+                        var tangent0 = hasTangents ? localToWorld.MultiplyVector(new Vector3(t[tri[i + 0]].x, t[tri[i + 0]].y, t[tri[i + 0]].z)) : Vector3.zero;
+                        var color0 = hasColors ? col[tri[i + 0]] : defaultVertexColor;
                         var vertex0 = new Vertex()
                         {
-                            position = transform.localToWorldMatrix.MultiplyPoint(v[tri[i + 0]]),
-                            normal = n.Length != 0 ? transform.localToWorldMatrix.MultiplyVector(n[tri[i + 0]]) : Vector3.zero,
-                            tangent = t.Length != 0 ? new Vector4(tangent0.x, tangent0.y, tangent0.z, t[tri[i + 0]].w) : Vector4.zero,
+                            position = localToWorld.MultiplyPoint(v[tri[i + 0]]),
+                            normal = hasNormals ? localToWorld.MultiplyVector(n[tri[i + 0]]) : Vector3.zero,
+                            tangent = hasTangents ? new Vector4(tangent0.x, tangent0.y, tangent0.z, t[tri[i + 0]].w) : Vector4.zero,
                             color = new Vector3(color0.r, color0.g, color0.b),
-                            uv0 = uv0.Length != 0 ? uv0[tri[i + 0]] : Vector2.zero,
-                            uv1 = uv1.Length != 0 ? uv1[tri[i + 0]] : Vector2.zero
+                            uv0 = hasUV0 ? uv0[tri[i + 0]] : Vector2.zero,
+                            uv1 = hasUV1 ? uv1[tri[i + 0]] : Vector2.zero
                         };
-                        var tangent1 = transform.localToWorldMatrix.MultiplyVector(new Vector3(t[tri[i + 1]].x, t[tri[i + 1]].y, t[tri[i + 1]].z));
-                        var color1 = col.Length != 0 ? col[tri[i + 1]] : defaultVertexColor;
+                        var tangent1 = hasTangents ? localToWorld.MultiplyVector(new Vector3(t[tri[i + 1]].x, t[tri[i + 1]].y, t[tri[i + 1]].z)) : Vector3.zero;
+                        var color1 = hasColors ? col[tri[i + 1]] : defaultVertexColor;
                         var vertex1 = new Vertex()
                         {
-                            position = transform.localToWorldMatrix.MultiplyPoint(v[tri[i + 1]]),
-                            normal = n.Length != 0 ? transform.localToWorldMatrix.MultiplyVector(n[tri[i + 1]]) : Vector3.zero,
-                            tangent = t.Length != 0 ? new Vector4(tangent1.x, tangent1.y, tangent1.z, t[tri[i + 1]].w) : Vector4.zero,
+                            position = localToWorld.MultiplyPoint(v[tri[i + 1]]),
+                            normal = hasNormals ? localToWorld.MultiplyVector(n[tri[i + 1]]) : Vector3.zero,
+                            tangent = hasTangents ? new Vector4(tangent1.x, tangent1.y, tangent1.z, t[tri[i + 1]].w) : Vector4.zero,
                             color = new Vector3(color1.r, color1.g, color1.b),
-                            uv0 = uv0.Length != 0 ? uv0[tri[i + 1]] : Vector2.zero,
-                            uv1 = uv1.Length != 0 ? uv1[tri[i + 1]] : Vector2.zero
+                            uv0 = hasUV0 ? uv0[tri[i + 1]] : Vector2.zero,
+                            uv1 = hasUV1 ? uv1[tri[i + 1]] : Vector2.zero
                         };
-                        var tangent2 = transform.localToWorldMatrix.MultiplyVector(new Vector3(t[tri[i + 2]].x, t[tri[i + 2]].y, t[tri[i + 2]].z));
-                        var color2 = col.Length != 0 ? col[tri[i + 2]] : defaultVertexColor;
+                        var tangent2 = hasTangents ? localToWorld.MultiplyVector(new Vector3(t[tri[i + 2]].x, t[tri[i + 2]].y, t[tri[i + 2]].z)) : Vector3.zero;
+                        var color2 = hasColors ? col[tri[i + 2]] : defaultVertexColor;
                         var vertex2 = new Vertex()
                         {
-                            position = transform.localToWorldMatrix.MultiplyPoint(v[tri[i + 2]]),
-                            normal = n.Length != 0 ? transform.localToWorldMatrix.MultiplyVector(n[tri[i + 2]]) : Vector3.zero,
-                            tangent = t.Length != 0 ? new Vector4(tangent2.x, tangent2.y, tangent2.z, t[tri[i + 2]].w) : Vector4.zero,
+                            position = localToWorld.MultiplyPoint(v[tri[i + 2]]),
+                            normal = hasNormals ? localToWorld.MultiplyVector(n[tri[i + 2]]) : Vector3.zero,
+                            tangent = hasTangents ? new Vector4(tangent2.x, tangent2.y, tangent2.z, t[tri[i + 2]].w) : Vector4.zero,
                             color = new Vector3(color2.r, color2.g, color2.b),
-                            uv0 = uv0.Length != 0 ? uv0[tri[i + 2]] : Vector2.zero,
-                            uv1 = uv1.Length != 0 ? uv1[tri[i + 2]] : Vector2.zero
+                            uv0 = hasUV0 ? uv0[tri[i + 2]] : Vector2.zero,
+                            uv1 = hasUV1 ? uv1[tri[i + 2]] : Vector2.zero
                         };
 
                         vertices.Add(negativeScale ? vertex1 : vertex0);
@@ -495,7 +502,7 @@ namespace Unity.VirtualMesh.Editor
 
                         meshletSizesLOD0[i] = meshlet.triangleCount * 3;
                     }
-                    uint partitionTargetSize = k_PackIndices ? 5 : 16; // max is 5 for packed indices for now (2^10 indices = 1024 verts = 5 leaf clusters of 192 indices)
+                    uint partitionTargetSize = k_PackIndices ? 5u : 16u; // max is 5 for packed indices for now (2^10 indices = 1024 verts = 5 leaf clusters of 192 indices)
                     var partitionCountLOD0 = MeshOperations.PartitionMeshlets(meshletPartition, meshletIndicesLOD0.ToArray(), meshletSizesLOD0, verticesLOD0, partitionTargetSize);
 
                     var meshlets = new List<Meshlet>[partitionCountLOD0];
