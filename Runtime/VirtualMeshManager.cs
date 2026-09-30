@@ -1206,6 +1206,8 @@ namespace Unity.VirtualMesh.Runtime
             {
                 if (m_DataJobRunning[i] && m_LoadMeshDataJobHandles[i].IsCompleted)
                 {
+                    m_LoadMeshDataJobHandles[i].Complete();
+
                     // dispatch compute copies
                     DispatchCopies(i);
 
@@ -1353,6 +1355,7 @@ namespace Unity.VirtualMesh.Runtime
             // only called once to intercept header jobs finishing
             if (m_HeaderJobRunning && m_LoadMeshHeaderJobHandle.IsCompleted)
             {
+                m_LoadMeshHeaderJobHandle.Complete();
                 m_HeaderJobRunning = false;
 
                 var temp = new uint[m_MemoryPageCount * 4];
